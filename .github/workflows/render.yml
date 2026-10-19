@@ -1,0 +1,67 @@
+name: Rendu vidéo YT-IA
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_id:
+        description: "Identifiant de la vidéo (ex. V261019-2006-C02)"
+        required: true
+      script:
+        description: "Script JSON produit par n8n"
+        required: true
+      callback_url:
+        description: "Webhook n8n à rappeler en fin de rendu"
+        required: false
+        default: ""
+
+permissions:
+  contents: write   # pour créer la Release qui contient les fichiers
+
+concurrency:
+  group: render-${{ inputs.video_id }}
+  cancel-in-progress: true
+
+jobs:
+  rendu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TTS_ENGINE: kokoro
+      KOKORO_VOICE: ff_siwis
+      X264_PRESET: veryfast
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Paquets système (FFmpeg, espeak-ng, polices)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg espeak-ng fonts-dejavu-core libsndfile1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Dépendances Python
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+
+      - name: Cache du modèle de voix Kokoro
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: kokoro-v1
+
+      - name: Écrire le script reçu
+        env:
+          SCRIPT_JSON: ${{ inputs.script }}
+        run: printf '%s' "$SCRIPT_JSON" > script.json
+
+      - name: Rendu + publication + rappel n8n
+        env:
+          VIDEO_ID: ${{ inputs.video_id }}
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python run_job.py

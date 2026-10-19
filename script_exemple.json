@@ -1,0 +1,26 @@
+{
+  "titre_video": "La descente de gradient expliquée simplement",
+  "titre_short": "Comment une IA apprend de ses erreurs",
+  "texte_miniature": "Descente de gradient",
+  "resume": "Comment un modèle ajuste ses poids pas à pas pour réduire son erreur.",
+  "scenes": [
+    {"id": 1, "partie": "accroche", "titre": "Introduction",
+     "narration": "Imaginez que vous êtes perdu en montagne, dans le brouillard, et que vous devez descendre jusqu'à la vallée. Vous ne voyez rien. Que faites-vous ? C'est exactement le problème que résout la descente de gradient.",
+     "visuel": {"type": "titre", "texte": "La descente de gradient", "sous_texte": "Comment une IA apprend de ses erreurs"}},
+    {"id": 2, "partie": "probleme", "titre": "Le problème",
+     "narration": "Un modèle de machine learning fait des prédictions. Au début, elles sont mauvaises. On mesure cette erreur avec une fonction de perte. Plus la perte est petite, meilleur est le modèle.",
+     "visuel": {"type": "points", "titre": "Le problème", "points": ["Le modèle prédit", "On mesure l'erreur : la perte", "Objectif : rendre la perte minimale"]}},
+    {"id": 3, "partie": "intuition", "titre": "L'intuition", "short": true,
+     "narration": "Revenons à la montagne. À chaque pas, vous sentez la pente sous vos pieds et vous avancez dans la direction qui descend le plus. Pas après pas, vous atteignez la vallée. Le modèle fait pareil avec ses poids.",
+     "visuel": {"type": "graphe", "fonction": "descente de gradient", "titre": "Descendre la pente, pas à pas", "legende": "Chaque point est une mise à jour des poids"}},
+    {"id": 4, "partie": "formalisation", "titre": "La formule",
+     "narration": "Mathématiquement, on retire au poids actuel le gradient de la perte, multiplié par un petit nombre appelé taux d'apprentissage. Le gradient indique la pente, le taux d'apprentissage la taille du pas.",
+     "visuel": {"type": "formule", "titre": "La règle de mise à jour", "latex": "w_{t+1} = w_t - \\eta \\, \\nabla L(w_t)", "legende": "η : taux d'apprentissage   ∇L : gradient de la perte"}},
+    {"id": 5, "partie": "exemple", "titre": "En code",
+     "narration": "En Python, la boucle tient en quelques lignes : on calcule le gradient, puis on met à jour le poids. Ici, après vingt itérations, le poids passe de quatre à presque zéro, là où la perte est minimale.",
+     "visuel": {"type": "code", "titre": "Descente de gradient en Python", "code": "w = 4.0          # poids initial\neta = 0.1        # taux d'apprentissage\n\nfor t in range(20):\n    grad = 2 * w     # dérivée de L(w) = w²\n    w = w - eta * grad\n\nprint(w)  # ≈ 0.046"}},
+    {"id": 6, "partie": "recap", "titre": "À retenir",
+     "narration": "À retenir : le gradient donne la direction, le taux d'apprentissage donne la taille du pas. Un taux trop grand fait rebondir le modèle, un taux trop petit le rend très lent. Abonnez-vous pour la suite : le réseau de neurones.",
+     "visuel": {"type": "comparaison", "titre": "Bien choisir le taux d'apprentissage", "gauche_titre": "Trop grand", "gauche_points": ["Le modèle rebondit", "Peut diverger"], "droite_titre": "Trop petit", "droite_points": ["Convergence très lente", "Coût de calcul élevé"]}}
+  ]
+}
