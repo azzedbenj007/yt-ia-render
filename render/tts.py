@@ -10,6 +10,7 @@ import subprocess
 
 ENGINE = os.getenv("TTS_ENGINE", "kokoro").lower()
 KOKORO_VOICE = os.getenv("KOKORO_VOICE", "ff_siwis")
+KOKORO_LANG = os.getenv("KOKORO_LANG", "f")  # f = français, a = anglais américain
 KOKORO_SPEED = float(os.getenv("KOKORO_SPEED", "1.0"))
 EDGE_VOICE = os.getenv("EDGE_VOICE", "fr-FR-HenriNeural")
 
@@ -35,6 +36,8 @@ _kokoro = None
 
 def preparer_texte(t: str) -> str:
     t = re.sub(r"[*_#`]", "", str(t))
+    if KOKORO_LANG != "f":  # corrections de prononciation réservées à la voix française
+        return t.strip()
     for motif, rempl in PRONONCIATION.items():
         t = re.sub(motif, rempl, t, flags=re.IGNORECASE)
     return t.strip()
@@ -52,7 +55,7 @@ def _kokoro_wav(texte, wav):
     import soundfile as sf
     from kokoro import KPipeline
     if _kokoro is None:
-        _kokoro = KPipeline(lang_code="f")  # f = français
+        _kokoro = KPipeline(lang_code=KOKORO_LANG)
     morceaux = [a for _, _, a in _kokoro(texte, voice=KOKORO_VOICE, speed=KOKORO_SPEED)]
     audio = np.concatenate(morceaux) if morceaux else np.zeros(24000)
     sf.write(wav, audio, 24000)

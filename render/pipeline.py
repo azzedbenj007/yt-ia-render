@@ -9,6 +9,10 @@ from pathlib import Path
 from tts import synthese
 from visuals import miniature, rendre_scene
 
+PROFIL = os.getenv("PROFIL", "ia").lower()
+if PROFIL == "kids":
+    from kids import miniature_kids, rendre_scene_kids
+
 DATA = Path(os.getenv("DATA_DIR", "/data"))
 ASSETS = Path(os.getenv("ASSETS_DIR", "/assets"))
 FPS = 30
@@ -152,7 +156,10 @@ def produire(video_id: str, script, log=print) -> dict:
         wav = dossier / "scenes" / f"s{i:02}.wav"
         png = dossier / "scenes" / f"s{i:02}.png"
         d = synthese(sc["narration"], str(wav))
-        rendre_scene(sc, str(png))
+        if PROFIL == "kids":
+            rendre_scene_kids(sc, str(png), i)
+        else:
+            rendre_scene(sc, str(png))
         clip = dossier / f"c{i:02}.mp4"
         clip_scene(png, wav, clip, d)
         durees.append(d)
@@ -179,9 +186,13 @@ def produire(video_id: str, script, log=print) -> dict:
     faire_short(dossier, clips, sel, scenes, durees, script.get("titre_short") or script.get("titre_video", ""))
 
     log(f"[{video_id}] miniature")
+    if PROFIL == "kids":
+        emoji = next(((s.get("visuel") or {}).get("emoji") for s in scenes if (s.get("visuel") or {}).get("emoji")), None)
+        miniature_kids(script.get("texte_miniature") or script.get("titre_video", ""), str(dossier / "miniature.jpg"), emoji)
     prefs = [i for i, s in enumerate(scenes) if (s.get("visuel") or {}).get("type") in ("graphe", "reseau", "formule")]
     fond = dossier / "scenes" / f"s{(prefs[0] if prefs else 0):02}.png"
-    miniature(script.get("texte_miniature") or script.get("titre_video", ""), str(fond), str(dossier / "miniature.jpg"))
+    if PROFIL != "kids":
+        miniature(script.get("texte_miniature") or script.get("titre_video", ""), str(fond), str(dossier / "miniature.jpg"))
 
     for c in clips:
         c.unlink(missing_ok=True)

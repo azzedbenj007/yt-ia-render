@@ -17,6 +17,20 @@ sys.path.insert(0, str(Path(__file__).parent / "render"))
 os.environ.setdefault("DATA_DIR", str(Path.cwd() / "data"))
 os.environ.setdefault("ASSETS_DIR", str(Path.cwd() / "assets"))
 
+# Profil lu dans le script AVANT d'importer le pipeline (voix et visuels se configurent à l'import)
+try:
+    _s = json.loads(Path("script.json").read_text(encoding="utf-8"))
+    if isinstance(_s, str):
+        _s = json.loads(_s)
+    if str(_s.get("profil", "")).lower() == "kids":
+        os.environ["PROFIL"] = "kids"
+        os.environ["KOKORO_LANG"] = "a"                       # anglais américain
+        os.environ["KOKORO_VOICE"] = os.getenv("KIDS_VOICE", "af_heart")
+        os.environ["KOKORO_SPEED"] = os.getenv("KIDS_SPEED", "0.88")
+        os.environ["EDGE_VOICE"] = "en-US-AnaNeural"          # voix enfant si repli edge-tts
+except Exception as e:
+    print(f"lecture du profil impossible : {e}")
+
 from pipeline import produire  # noqa: E402
 
 video_id = os.environ["VIDEO_ID"]
@@ -48,7 +62,7 @@ try:
     subprocess.run(["gh", "release", "delete", video_id, "--repo", repo, "--yes", "--cleanup-tag"],
                    capture_output=True)
     subprocess.run(["gh", "release", "create", video_id, *fichiers, "--repo", repo,
-                    "--title", f"Rendu {video_id}", "--notes", "Rendu automatique YT-IA"], check=True)
+                    "--title", f"Rendu {video_id}", "--notes", f"Rendu automatique YT-IA (profil {os.getenv('PROFIL', 'ia')})"], check=True)
     res["base_url"] = f"https://github.com/{repo}/releases/download/{video_id}/"
     res["temps_rendu_s"] = round(time.time() - debut)
     res.pop("dossier", None)

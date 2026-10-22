@@ -35,7 +35,7 @@ jobs:
       - name: Paquets système (FFmpeg, espeak-ng, polices)
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg espeak-ng fonts-dejavu-core libsndfile1
+          sudo apt-get install -y -qq ffmpeg espeak-ng fonts-dejavu-core fonts-noto-color-emoji fonts-comic-neue libsndfile1
 
       - uses: actions/setup-python@v5
         with:
